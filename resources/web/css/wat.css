@@ -1,0 +1,12 @@
+table.taskselection td {
+  border: none !important;
+}
+
+.panel-collapse-toggle {
+  cursor: pointer;
+}
+
+.login {
+	max-width: 300px;
+}
+
