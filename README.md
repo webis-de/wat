@@ -9,7 +9,7 @@ For a quick look into WAT-SL, please visit [our demo server](https://webis16.med
 
 Usage
 -----
-Download the [wat.jar](https://github.com/webis-de/wat/releases/download/1.1.0/wat.jar). Then unpack the [example-project.zip](https://github.com/webis-de/wat/releases/download/1.1.0/example-project.zip) and cd into the example project folder. Then use
+Download the [wat.jar](https://github.com/webis-de/wat/releases/download/1.1.1/wat.jar). Then unpack the [example-project.zip](https://github.com/webis-de/wat/releases/download/1.1.0/example-project.zip) and cd into the example project folder. Then use
 
     java -jar <path-to>/wat.jar [<port>]
 

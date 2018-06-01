@@ -137,9 +137,11 @@ public class WatServlet extends HttpServlet {
   
   private String getAction(final HttpServletRequest request) {
     final String requestUri = request.getRequestURI();
-    assert requestUri.startsWith(WatServletServer.SERVLET_PATH);
+    final int pathStart = requestUri.lastIndexOf(WatServletServer.SERVLET_PATH);
+    assert pathStart >= 0;
     // + 1 due to the "/" following the path
-    final int requestOffset = WatServletServer.SERVLET_PATH.length() + 1;
+    final int requestOffset =
+        pathStart + WatServletServer.SERVLET_PATH.length() + 1;
     if (requestOffset >= requestUri.length()) {
       return "";
     } else {
