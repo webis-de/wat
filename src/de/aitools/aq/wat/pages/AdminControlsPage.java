@@ -18,6 +18,11 @@ public class AdminControlsPage extends AdminPage {
     this.makeButton(output, WatServlet.ADMIN_ACTION_RESULTS,
         "Writes the 'key = value' mappings of all completed tasks to the "
         + "'results' directory in the server directory.");
+    
+    output.append("<div class=\"panel\">\n");
+    this.makeButton(output, WatServlet.ADMIN_ACTION_SHOW_PROGRESS, null);
+    output.append("</div>\n");
+
     output.append("<br/>\n");
   }
   

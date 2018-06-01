@@ -37,17 +37,20 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
   
   private final List<Record> nonInternalRecordsReadOnly;
   
+  private final WorkTime workTime;
+  
   public RecordsFile(final File directory, final String annotator)
   throws IOException {
     this(new File(directory, annotator + FILE_SUFFIX));
   }
   
-  private RecordsFile(final File file)
+  protected RecordsFile(final File file)
   throws IOException {
     this.file = file;
     this.nonInternalRecords = new ArrayList<>();
     this.nonInternalRecordsReadOnly =
         Collections.unmodifiableList(this.nonInternalRecords);
+    this.workTime = new WorkTime();
     
     if (this.file.exists()) {
       try (final BufferedReader reader =
@@ -56,8 +59,16 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
         while ((line = reader.readLine()) != null) {
           try {
             final Record record = Record.read(line);
+            final Client client = record.getClient();
             if (!record.isInternal()) {
               this.nonInternalRecords.add(record);
+              if (client == Client.ANNOTATOR) {
+                this.workTime.annotate(record.date, record.timeZoneOffset);
+              }
+            } else if (record.isTaskOpen()) {
+              if (client == Client.ANNOTATOR) {
+                this.workTime.openTask(record.date, record.timeZoneOffset);
+              }
             }
           } catch (final ParseException e) {
             throw new IOException(e);
@@ -96,6 +107,10 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
     }
   }
   
+  public int getAnnotatorWorkTimeInSeconds() {
+    return this.workTime.getSeconds();
+  }
+  
   private Record getLastRecord() {
     if (this.nonInternalRecords.isEmpty()) {
       return null;
@@ -113,7 +128,7 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
   
   public void annotate(final String componentName,
       final String key, final String value,
-      final String client, final int timeZoneOffset)
+      final Client client, final int timeZoneOffset)
   throws IOException {
     if (key.equals(Record.COMPONENT_NAME_INTERNAL)) {
       throw new IllegalArgumentException(
@@ -124,10 +139,13 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
           new Date(), componentName, key, value, client, timeZoneOffset);
       record.write(this.file);
       this.nonInternalRecords.add(record);
+      if (client == Client.ANNOTATOR) {
+        this.workTime.annotate(record.date, timeZoneOffset);
+      }
     }
   }
   
-  public void openTask(final String client, final int timeZoneOffset)
+  public void openTask(final Client client, final int timeZoneOffset)
   throws IOException {
     synchronized (this) {
       final Record record = new Record(client, timeZoneOffset);
@@ -143,7 +161,20 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
     return fileName.substring(0, fileName.length() - FILE_SUFFIX.length());
   }
   
-  
+
+  /**
+   * A single storable record that holds a value for a component-specific key.
+   * <p>
+   * WAT stores all data as key-value pairs, where the key consists of the
+   * component name and a component-specific key.
+   * </p><p>
+   * WAT also stores additional information for each record: the client IP
+   * address, the date, and the timezone offset.
+   * </p>
+   *
+   * @author johannes.kiesel@uni-weimar.de
+   *
+   */
   public static class Record {
     
     private static final String COMPONENT_NAME_INTERNAL = "INFO";
@@ -156,7 +187,7 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
     
     private final int timeZoneOffset;
     
-    private final String client;
+    private final Client client;
     
     private final String componentName;
     
@@ -164,15 +195,30 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
     
     private final String value;
     
-    private Record(final String client, final int timeZoneOffset) {
+    /**
+     * Internal record for opening a task.
+     * @param client IP address
+     * @param timeZoneOffset of the client in minutes
+     */
+    protected Record(final Client client, final int timeZoneOffset) {
       this(new Date(), COMPONENT_NAME_INTERNAL,
           INTERNAL_KEY_ACTION, INTERNAL_ACTION_OPEN, client, timeZoneOffset);
     }
-    
-    private Record(
+
+    /**
+     * General record.
+     * @param date date at which the record was filed
+     * @param componentName name of the component for which the record contains
+     * a value
+     * @param key component-specific key
+     * @param value value for the component-specific key
+     * @param client IP address
+     * @param timeZoneOffset of the client in minutes
+     */
+     protected Record(
         final Date date, final String componentName,
         final String key, final String value,
-        final String client, final int timeZoneOffset) {
+        final Client client, final int timeZoneOffset) {
       if (date == null) {
         throw new NullPointerException("The date must not be null");
       }
@@ -195,44 +241,95 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
       this.key = key;
       this.value = value.replaceAll("\n", "\\\\n");
     }
-    
-    private static Record read(final String line) throws ParseException {
+     
+     /**
+      * Reads a record from one line of a records file.
+      * @see #write(File)
+      * @see #write(Writer)
+      */
+     protected static Record read(final String line) throws ParseException {
       final String fields[] = line.split(FIELD_SEPARATOR, 6);
       final Date date = DATE_FORMAT.parse(fields[0]);
       final int timezoneOffset = Integer.parseInt(fields[1]);
-      final String client = fields[2];
+      final Client client = Client.valueOf(fields[2]);
       final String componentName = fields[3];
       final String key = fields[4];
       final String value = fields[5];
       return new Record(date, componentName, key, value, client, timezoneOffset);
     }
 
+     /**
+      * Gets the name of the component for which this record contains a value.
+      * @see #getKey()
+      * @see #getValue()
+      */
     public String getComponentName() {
       return this.componentName;
     }
-    
+    /**
+     * Gets the component-specific key for which this record contains a value.
+     * @see #getComponentName()
+     * @see #getValue()
+     */
     public String getKey() {
       return this.key;
     }
-    
+    /**
+     * Gets the value contained in this record.
+     * @see #getComponentName()
+     * @see #getKey()
+     */
     public String getValue() {
       return this.value;
     }
+
+    /**
+     * Gets the client from which this record was created.
+     */ 
     
-    private boolean isInternal() {
+    public Client getClient() {
+      return this.client;
+    }
+    
+    /**
+     * Checks whether this record is a WAT-internal record.
+     * Currently, this is only used when an annotator opens a task page.
+     * @see #isTaskOpen()
+     */
+    protected boolean isInternal() {
       return this.componentName.equals(COMPONENT_NAME_INTERNAL);
     }
     
-    private void write(final File file) throws IOException {
+    /**
+     * Checks whether this record is a WAT-internal open-task record.
+     * @see #isInternal()
+     */
+    protected boolean isTaskOpen() {
+      return this.isInternal()
+          && this.getKey().equals(INTERNAL_KEY_ACTION)
+          && this.getValue().equals(INTERNAL_ACTION_OPEN);
+    }
+    
+    /**
+     * Writes this record to given file.
+     * @see #read(String)
+     * @see #write(Writer)
+     */
+    protected void write(final File file) throws IOException {
       try (final FileWriter writer = new FileWriter(file, true)) {
         this.write(writer);
       }
     }
-    
-    private void write(final Writer writer) throws IOException {
+
+    /**
+     * Writes this record to given writer.
+     * @see #read(String)
+     * @see #write(File)
+     */
+    protected void write(final Writer writer) throws IOException {
       writer.append(DATE_FORMAT.format(this.date)).append(FIELD_SEPARATOR)
         .append(String.valueOf(this.timeZoneOffset)).append(FIELD_SEPARATOR)
-        .append(this.client).append(FIELD_SEPARATOR)
+        .append(this.client.toString()).append(FIELD_SEPARATOR)
         .append(this.componentName).append(FIELD_SEPARATOR)
         .append(this.key).append(FIELD_SEPARATOR)
         .append(this.value).append("\n");

@@ -3,6 +3,7 @@ function update(component, key, value) {
   var annotator = $("#task-internal-field-annotator").val();
   var password = $("#task-internal-field-password").val();
   var task = $("#task-internal-field-task").val();
+  var isAdminLogin = $("#task-internal-field-is-admin-login").val();
   var url = "update"
       + "?annotator="+escape(annotator)
       + "&password="+escape(password)
@@ -10,7 +11,8 @@ function update(component, key, value) {
   		+ "&component="+escape(component)
   		+ "&key="+escape(key)
   		+ "&value="+escape(value)
-      + "&timezone="+getTimezoneOffset();
+      + "&timezone="+getTimezoneOffset()
+      + "&is-admin-login="+escape(isAdminLogin);
 
   $.getJSON(url, function(data) {
     setValue(component, key, value);

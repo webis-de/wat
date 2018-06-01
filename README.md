@@ -6,7 +6,7 @@ Usage
 -----
 Unpack the example-project.zip and cd into the example project folder. Then use
 
-    java -jar ../wat.jar [<port>]
+    java -jar <path-to>/wat.jar [<port>]
 
 to start the server on the given port (default port is 2112). You can then access documentation on how to adjust and use the server at
 
@@ -15,9 +15,8 @@ to start the server on the given port (default port is 2112). You can then acces
 
 Building
 --------
-Building the JAR anew requires the following libraries:
-  - Jetty 9.4.0
-  - Apache commons lang3 3.1
 
-Launch configuration: de.aitools.aq.wat.WatServletServer
+    mvn clean install assembly:single
+    cp target/wat-*-jar-with-dependencies.jar wat.jar 
+
 

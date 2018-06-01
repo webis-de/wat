@@ -23,13 +23,15 @@ public abstract class AnnotatorPage extends Page {
   }
 
   public void print(final PrintWriter output,
-      final Annotator annotator, final TaskState state) {
+      final Annotator annotator, final TaskState state,
+      final boolean isAdminLogin) {
     output.append("<!DOCTYPE html>\n");
     output.append("<html>\n");
+
     this.startHead(output);
     this.printInFileScripts(output, annotator, state);
     output.append("</head>");
-    this.printBody(output, annotator, state);
+    this.printBody(output, annotator, state, isAdminLogin);
     output.append("</html>\n");
   }
   
@@ -37,20 +39,22 @@ public abstract class AnnotatorPage extends Page {
       final Annotator annotator, final TaskState state);
   
   protected void printBody(final PrintWriter output,
-      final Annotator annotator, final TaskState state) {
+      final Annotator annotator, final TaskState state,
+      final boolean isAdminLogin) {
     output.append("<body>\n");
     output.append("<form id=\"form\" action=\"")
       .append(WatServlet.ACTION_ANNOTATE)
       .append("\" method=\"POST\" accept-charset=\"utf-8\">\n");
     
-    this.printHiddenElements(output, annotator, state);
+    this.printHiddenElements(output, annotator, state, isAdminLogin);
 
-    output.append("<section class=\"container\" id=\"Other\" style=\"margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;\">");
+    output.append("<section class=\"container\">");
     output.append("<div class=\"row col-xs-12 col-md-12\">");
     
-    this.printTopNavbar(output, annotator, state);
+    this.printTopNavbar(output, annotator, state, isAdminLogin);
     this.printMain(output, annotator, state);
     this.printBottomNavbar(output, annotator, state);
+
     output.append("</div>");
     output.append("</section>");
     output.append("</form>\n");
@@ -58,7 +62,8 @@ public abstract class AnnotatorPage extends Page {
   }
   
   private void printHiddenElements(final PrintWriter output,
-      final Annotator annotator, final TaskState state) {
+      final Annotator annotator, final TaskState state,
+      final boolean isAdminLogin) {
     output.append("<input type=\"hidden\" name=\"")
       .append(WatServlet.REQUEST_PARAMETER_TIME_ZONE_OFFSET).append("\"/>");
     if (annotator != null) {
@@ -68,6 +73,9 @@ public abstract class AnnotatorPage extends Page {
       output.append("<input id=\"task-internal-field-password\" type=\"hidden\" name=\"")
         .append(WatServlet.REQUEST_PARAMETER_PASSWORD).append("\" value=\"")
         .append(annotator.getPassword()).append("\" />");
+      output.append("<input id=\"task-internal-field-is-admin-login\" type=\"hidden\" name=\"")
+          .append(WatServlet.REQUEST_PARAMETER_ADMIN_LOGIN).append("\" value=\"")
+          .append(String.valueOf(isAdminLogin)).append("\" />");
     }
     if (state != null) {
       output.append("<input id=\"task-internal-field-task\" type=\"hidden\" name=\"")
@@ -77,7 +85,8 @@ public abstract class AnnotatorPage extends Page {
   }
   
   private void printTopNavbar(final PrintWriter output,
-      final Annotator annotator, final TaskState state) {
+      final Annotator annotator, final TaskState state,
+      final boolean isAdminLogin) {
     output.append("<nav class=\"navbar navbar-default\">\n");
     output.append("  <div class=\"container-fluid\">\n");
 
@@ -90,6 +99,9 @@ public abstract class AnnotatorPage extends Page {
       if (state != null) {
         output.append("&commat;").append(
             state.getTask().getName().replaceAll("\\s+", "&nbsp;"));
+      }
+      if (isAdminLogin) {
+        output.append(" (login through admin console)");
       }
       output.append("</p>\n");
     }

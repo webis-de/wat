@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import de.aitools.aq.wat.data.Component;
 import de.aitools.aq.wat.data.ComponentState;

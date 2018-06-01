@@ -3,6 +3,8 @@ package de.aitools.aq.wat;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import de.aitools.aq.wat.data.Annotator;
 import de.aitools.aq.wat.data.Task;
 import de.aitools.aq.wat.data.TaskState;
+import de.aitools.aq.wat.io.Client;
+import de.aitools.aq.wat.pages.AdminAnnotationProgressPanel;
 import de.aitools.aq.wat.pages.AdminControlsPage;
 import de.aitools.aq.wat.pages.AdminLoginFailedPage;
 import de.aitools.aq.wat.pages.AdminLoginPage;
@@ -20,6 +24,7 @@ import de.aitools.aq.wat.pages.AnnotatorLoginFailedPage;
 import de.aitools.aq.wat.pages.AnnotatorLoginPage;
 import de.aitools.aq.wat.pages.AnnotatorPage;
 import de.aitools.aq.wat.pages.AnnotatorTaskSelectionPage;
+import de.aitools.aq.wat.pages.Panel;
 
 public class WatServlet extends HttpServlet {
 
@@ -34,6 +39,8 @@ public class WatServlet extends HttpServlet {
   public static final String REQUEST_PARAMETER_ANNOTATOR = "annotator";
 
   public static final String REQUEST_PARAMETER_PASSWORD = "password";
+
+  public static final String REQUEST_PARAMETER_ADMIN_LOGIN = "is-admin-login";
 
   public static final String REQUEST_PARAMETER_TASK = "task";
 
@@ -50,6 +57,8 @@ public class WatServlet extends HttpServlet {
   public static final String ADMIN_ACTION_RELOAD = "Reload server";
   
   public static final String ADMIN_ACTION_RESULTS = "Write results";
+
+  public static final String ADMIN_ACTION_SHOW_PROGRESS = "Show annotation progress";
   
   private final WatProject project;
   
@@ -65,15 +74,21 @@ public class WatServlet extends HttpServlet {
   
   private final AdminPage adminControlsPage;
   
+  private final Panel adminAnnotationProgressPanel;
+  
   public WatServlet() throws IOException {
     this.project = new WatProject(new File("."));
     final String projectName = this.project.getName();
+
     this.annotatorLoginPage = new AnnotatorLoginPage(projectName);
     this.annotatorLoginFailedPage = new AnnotatorLoginFailedPage(projectName);
     this.annotatorTaskSelectionPage = new AnnotatorTaskSelectionPage(projectName);
     this.adminLoginPage = new AdminLoginPage(projectName);
     this.adminLoginFailedPage = new AdminLoginFailedPage(projectName);
     this.adminControlsPage = new AdminControlsPage(projectName);
+    
+    this.adminAnnotationProgressPanel =
+        new AdminAnnotationProgressPanel(this.project);
   }
 
   @Override
@@ -96,6 +111,9 @@ public class WatServlet extends HttpServlet {
     try (final PrintWriter output = response.getWriter()) {
       final String action = this.getAction(request);
       switch (action) {
+      case "":
+        response.sendRedirect(request.getRequestURI() + "/" + ACTION_ANNOTATE);
+        break;
       case ACTION_ANNOTATE:
         response.setContentType("text/html");
         this.serveAnnotate(request, output);
@@ -123,7 +141,7 @@ public class WatServlet extends HttpServlet {
     // + 1 due to the "/" following the path
     final int requestOffset = WatServletServer.SERVLET_PATH.length() + 1;
     if (requestOffset >= requestUri.length()) {
-      return ACTION_ANNOTATE;
+      return "";
     } else {
       final String[] requestParts =
           requestUri.substring(requestOffset).split("/");
@@ -138,24 +156,29 @@ public class WatServlet extends HttpServlet {
         request.getParameter(REQUEST_PARAMETER_ANNOTATOR);
     final String password =
         request.getParameter(REQUEST_PARAMETER_PASSWORD);
+    final String isAdminLoginString =
+        request.getParameter(REQUEST_PARAMETER_ADMIN_LOGIN);
+    final boolean isAdminLogin = isAdminLoginString == null ?
+        false : Boolean.parseBoolean(isAdminLoginString);
     final Annotator annotator = this.project.getAnnotator(annotatorName);
     if (annotatorName == null || annotatorName.isEmpty()) {
-      this.annotatorLoginPage.print(output, null, null);
+      this.annotatorLoginPage.print(output, null, null, isAdminLogin);
     } else if (annotator == null || !annotator.checkPassword(password)) {
-      this.annotatorLoginFailedPage.print(output, null, null);
+      this.annotatorLoginFailedPage.print(output, null, null, isAdminLogin);
     } else {
       final String taskName =
           request.getParameter(REQUEST_PARAMETER_TASK);
       final Task task = annotator.getTask(taskName);
       if (task == null) {
-        this.annotatorTaskSelectionPage.print(output, annotator, null);
+        this.annotatorTaskSelectionPage.print(
+            output, annotator, null, isAdminLogin);
       } else {
         final int timeZoneOffset = Integer.parseInt(
             request.getParameter(REQUEST_PARAMETER_TIME_ZONE_OFFSET));
-        final String client = this.getClient(request);
+        final Client client = this.getClient(request);
         final TaskState state = annotator.getState(task);
         state.workerOpenedTask(client, timeZoneOffset);
-        task.getPage().print(output, annotator, state);
+        task.getPage().print(output, annotator, state, isAdminLogin);
       }
     }
   }
@@ -173,7 +196,7 @@ public class WatServlet extends HttpServlet {
           request.getParameter(REQUEST_PARAMETER_TASK);
       final Task task = annotator.getTask(taskName);
       if (task != null) {
-        final String client = this.getClient(request);
+        final Client client = this.getClient(request);
         final int timeZoneOffset = Integer.parseInt(
             request.getParameter(REQUEST_PARAMETER_TIME_ZONE_OFFSET));
         final TaskState state = annotator.getState(task);
@@ -208,6 +231,7 @@ public class WatServlet extends HttpServlet {
       final String adminAction =
           request.getParameter(REQUEST_PARAMETER_ADMIN_ACTION);
       boolean adminActionSuccess = true;
+      final List<Panel> panels = new ArrayList<>();
       if (adminAction != null) {
         switch (adminAction) {
         case ADMIN_ACTION_RELOAD:
@@ -216,6 +240,9 @@ public class WatServlet extends HttpServlet {
             this.adminLoginFailedPage.print(output, null);
             return;
           }
+          break;
+        case ADMIN_ACTION_SHOW_PROGRESS:
+          panels.add(this.adminAnnotationProgressPanel);
           break;
         case ADMIN_ACTION_RESULTS:
           this.project.writeResults();
@@ -226,28 +253,18 @@ public class WatServlet extends HttpServlet {
         }
       }
       this.adminControlsPage.print(
-          output, password, adminAction, adminActionSuccess);
+          output, password, adminAction, adminActionSuccess, panels);
     }
   }
   
-  private String getClient(final HttpServletRequest request) {
-    String ip = request.getHeader("X-Forwarded-For");  
-    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
-        ip = request.getHeader("Proxy-Client-IP");  
-    }  
-    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
-        ip = request.getHeader("WL-Proxy-Client-IP");  
-    }  
-    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
-        ip = request.getHeader("HTTP_CLIENT_IP");  
-    }  
-    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
-        ip = request.getHeader("HTTP_X_FORWARDED_FOR");  
-    }  
-    if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
-        ip = request.getRemoteAddr();  
-    }  
-    return ip; 
+  private Client getClient(final HttpServletRequest request) {
+    final String isAdminLoginString =
+        request.getParameter(REQUEST_PARAMETER_ADMIN_LOGIN);
+    if (isAdminLoginString != null && Boolean.parseBoolean(isAdminLoginString)) {
+      return Client.ADMIN;
+    } else {
+      return Client.ANNOTATOR;
+    }
   }
 
 }

@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import de.aitools.aq.wat.io.Client;
 import de.aitools.aq.wat.io.RecordsFile;
 import de.aitools.aq.wat.io.RecordsFile.Record;
 
@@ -98,6 +99,10 @@ public class TaskState implements Iterable<Entry<String, ComponentState>> {
   public Date getLastUpdateInLocalTime() {
     return this.recordFile.getLastUpdateInLocalTime();
   }
+
+  public int getAnnotatorWorkTimeInSeconds() {
+    return this.recordFile.getAnnotatorWorkTimeInSeconds();
+  }
   
   @Override
   public Iterator<Entry<String, ComponentState>> iterator() {
@@ -118,14 +123,14 @@ public class TaskState implements Iterable<Entry<String, ComponentState>> {
   //                             Modify state                             //
   //----------------------------------------------------------------------//
 
-  public void workerOpenedTask(final String client, final int timeZoneOffset)
+  public void workerOpenedTask(final Client client, final int timeZoneOffset)
   throws IOException {
     this.recordFile.openTask(client, timeZoneOffset);
   }
 
   public void setValue(final String componentName,
       final String key, final String value,
-      final String client, final int timeZoneOffset)
+      final Client client, final int timeZoneOffset)
   throws NullPointerException, IllegalArgumentException, IOException {
     this.recordFile.annotate(componentName, key, value, client, timeZoneOffset);
     this.componentStates.get(componentName).updateValue(key, value);

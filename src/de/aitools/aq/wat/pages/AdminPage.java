@@ -1,6 +1,7 @@
 package de.aitools.aq.wat.pages;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import de.aitools.aq.wat.WatServlet;
 
@@ -13,21 +14,23 @@ public abstract class AdminPage extends Page {
   
   public void print(final PrintWriter output,
       final String password) {
-    this.print(output, password, null, false);
+    this.print(output, password, null, false, null);
   }
   
   public void print(final PrintWriter output, final String password,
-      final String adminAction, final boolean adminActionSuccess) {
+      final String adminAction, final boolean adminActionSuccess,
+      final List<Panel> panels) {
     output.append("<!DOCTYPE html>\n");
     output.append("<html>\n");
     this.startHead(output);
     output.append("</head>");
-    this.printBody(output, password, adminAction, adminActionSuccess);
+    this.printBody(output, password, adminAction, adminActionSuccess, panels);
     output.append("</html>\n");
   }
   
   private void printBody(final PrintWriter output, final String password,
-      final String adminAction, final boolean adminActionSuccess) {
+      final String adminAction, final boolean adminActionSuccess,
+      final List<Panel> panels) {
     output.append("<body>\n");
     output.append("<form id=\"form\" action=\"")
       .append(WatServlet.ACTION_ADMIN)
@@ -51,6 +54,13 @@ public abstract class AdminPage extends Page {
     output.append("</div>");
     output.append("</section>");
     output.append("</form>\n");
+
+    output.append("<section class=\"container\">");
+    output.append("<div class=\"row col-xs-12 col-md-12\">");
+    this.printPanels(output, panels);
+    output.append("</div>");
+    output.append("</section>");
+    
     output.append("</body>\n");
   }
   
@@ -97,6 +107,16 @@ public abstract class AdminPage extends Page {
   
   protected abstract void printMain(
       final PrintWriter output);
+
+  protected void printPanels(
+      final PrintWriter output, final List<Panel> panels) {
+    if (panels != null) {
+      for (final Panel panel : panels) {
+        panel.printPanel(output);
+        output.append("<br/>\n\n");
+      }
+    }
+  }
   
   private void printBottomNavbar(
       final PrintWriter output, final boolean loggedIn) {
