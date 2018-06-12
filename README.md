@@ -33,6 +33,7 @@ You can then start the demo-server like this:
 
     docker run -p <port>:2112 -t wat
 
-Or just use the version in our [repository on docker hub](https://hub.docker.com/r/webis/wat/)
+Or just use the version in our [repository on docker hub](https://hub.docker.com/r/webis/wat/) like this:
 
+    docker run -d -p 2112:2112 --restart=unless-stopped -t webis/wat:1.1.1
 
