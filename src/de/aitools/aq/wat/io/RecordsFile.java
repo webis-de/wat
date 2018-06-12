@@ -62,11 +62,11 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
             final Client client = record.getClient();
             if (!record.isInternal()) {
               this.nonInternalRecords.add(record);
-              if (client == Client.ANNOTATOR) {
+              if (!client.isAdmin()) {
                 this.workTime.annotate(record.date, record.timeZoneOffset);
               }
             } else if (record.isTaskOpen()) {
-              if (client == Client.ANNOTATOR) {
+              if (!client.isAdmin()) {
                 this.workTime.openTask(record.date, record.timeZoneOffset);
               }
             }
@@ -139,7 +139,7 @@ public class RecordsFile implements Iterable<RecordsFile.Record> {
           new Date(), componentName, key, value, client, timeZoneOffset);
       record.write(this.file);
       this.nonInternalRecords.add(record);
-      if (client == Client.ANNOTATOR) {
+      if (!client.isAdmin()) {
         this.workTime.annotate(record.date, timeZoneOffset);
       }
     }

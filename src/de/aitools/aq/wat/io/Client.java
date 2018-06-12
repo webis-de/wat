@@ -1,6 +1,18 @@
 package de.aitools.aq.wat.io;
 
 public enum Client {
-  ANNOTATOR,
-  ADMIN
+  ANNOTATOR {
+    @Override
+    public boolean isAdmin() {
+      return false;
+    }
+  },
+  ADMIN {
+    @Override
+    public boolean isAdmin() {
+      return true;
+    }
+  };
+  
+  public abstract boolean isAdmin();
 }
