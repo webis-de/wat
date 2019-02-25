@@ -4,7 +4,7 @@ Web Annotation Tool for Segment Labeling.
 
 Demo server
 -----------
-For a quick look into WAT-SL, please visit [our demo server](https://webis18.medien.uni-weimar.de:/wat-sl/).
+For a quick look into WAT-SL, please visit [our demo server](https://demo.webis.de/wat-sl/).
 
 
 Usage
