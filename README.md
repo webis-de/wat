@@ -36,4 +36,10 @@ You can then start the demo-server like this:
 Or just use the version in our [repository on docker hub](https://hub.docker.com/r/webis/wat/) like this:
 
     docker run -d -p 2112:2112 --restart=unless-stopped -t webis/wat:1.1.1
+    
+    
+Citation
+--------
+If you use WAT-SL in your scientific work, please refer to it using [this publication](https://webis.de/publications.html#filter:WAT-SL%20A%20Customizable%20Web%20Annotation%20Tool%20for%20Segment%20Labeling):
 
+Johannes Kiesel, Henning Wachsmuth, Khalid Al-Khatib, and Benno Stein. WAT-SL: A Customizable Web Annotation Tool for Segment Labeling. In Software Demonstrations at the 15th Conference of the European Chapter of the Association for Computational Linguistics (EACL 2017), pages 13-16, April 2017.
