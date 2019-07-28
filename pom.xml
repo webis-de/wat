@@ -1,53 +1,548 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>de.webis</groupId>
-  <artifactId>wat</artifactId>
-  <packaging>jar</packaging>
-  <version>1.1.1</version>
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>resources</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-		    <configuration>
-	        <archive>
-            <manifest>
-              <mainClass>de.aitools.aq.wat.WatServletServer</mainClass>
-            </manifest>
-	        </archive>
-	        <descriptorRefs>
-	          <descriptorRef>jar-with-dependencies</descriptorRef>
-	        </descriptorRefs>
-		    </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  <dependencies>
-  	<dependency>
-  		<groupId>org.eclipse.jetty</groupId>
-  		<artifactId>jetty-servlet</artifactId>
-  		<version>9.4.10.v20180503</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.apache.commons</groupId>
-  		<artifactId>commons-text</artifactId>
-  		<version>1.3</version>
-  	</dependency>
-  </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>de.aitools.aq</groupId>
+	<artifactId>new-WAT-SL</artifactId>
+	<version>2.0</version>
+	<packaging>jar</packaging>
+
+	<name>new-WAT-SL</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.alpn/alpn-api -->
+		<dependency>
+			<groupId>org.eclipse.jetty.alpn</groupId>
+			<artifactId>alpn-api</artifactId>
+			<version>1.1.3.v20160715</version>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>6.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.ow2.asm/asm-commons -->
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-commons</artifactId>
+			<version>6.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api -->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mortbay.jasper/apache-el -->
+		<dependency>
+			<groupId>org.mortbay.jasper</groupId>
+			<artifactId>apache-el</artifactId>
+			<version>8.5.23</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mortbay.jasper/apache-jsp -->
+		<dependency>
+			<groupId>org.mortbay.jasper</groupId>
+			<artifactId>apache-jsp</artifactId>
+			<version>8.5.23</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jdt/ecj -->
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>ecj</artifactId>
+			<version>3.12.3</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/apache-jsp -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>apache-jsp</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.taglibs/taglibs-standard-impl -->
+		<dependency>
+			<groupId>org.apache.taglibs</groupId>
+			<artifactId>taglibs-standard-impl</artifactId>
+			<version>1.2.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.taglibs/taglibs-standard-spec -->
+		<dependency>
+			<groupId>org.apache.taglibs</groupId>
+			<artifactId>taglibs-standard-spec</artifactId>
+			<version>1.2.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.cdi/cdi-core -->
+		<dependency>
+			<groupId>org.eclipse.jetty.cdi</groupId>
+			<artifactId>cdi-core</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.cdi/cdi-servlet -->
+		<dependency>
+			<groupId>org.eclipse.jetty.cdi</groupId>
+			<artifactId>cdi-servlet</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.fcgi/fcgi-client -->
+		<dependency>
+			<groupId>org.eclipse.jetty.fcgi</groupId>
+			<artifactId>fcgi-client</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.fcgi/fcgi-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty.fcgi</groupId>
+			<artifactId>fcgi-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.http2/http2-common -->
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-common</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.http2/http2-hpack -->
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-hpack</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.http2/http2-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty.http2</groupId>
+			<artifactId>http2-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.orbit/javax.security.auth.message -->
+		<dependency>
+			<groupId>org.eclipse.jetty.orbit</groupId>
+			<artifactId>javax.security.auth.message</artifactId>
+			<version>1.0.0.v201108011116</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-alpn-conscrypt-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-conscrypt-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-alpn-java-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-java-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-alpn-openjdk8-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-openjdk8-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-alpn-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-alpn-server</artifactId>
+			<version>9.4.12.RC2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-annotations -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-annotations</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-client -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-client</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-continuation -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-continuation</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.gcloud/jetty-gcloud-session-manager -->
+		<dependency>
+			<groupId>org.eclipse.jetty.gcloud</groupId>
+			<artifactId>jetty-gcloud-session-manager</artifactId>
+			<version>9.4.6.v20170531</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-hazelcast -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-hazelcast</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-http -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-infinispan -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-infinispan</artifactId>
+			<version>9.4.6.v20170531</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-jaas -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jaas</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-jaspi -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jaspi</artifactId>
+			<version>9.4.6.v20170531</version>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-jmx -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jmx</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-jndi -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jndi</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-bom -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-bom</artifactId>
+			<version>9.4.12.RC2</version>
+			<type>pom</type>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.memcached/jetty-memcached-sessions -->
+		<dependency>
+			<groupId>org.eclipse.jetty.memcached</groupId>
+			<artifactId>jetty-memcached-sessions</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-nosql -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-nosql</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-plus -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-plus</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-proxy -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-proxy</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-quickstart -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-quickstart</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-rewrite -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-rewrite</artifactId>
+			<version>9.4.6.v20170531</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.toolchain/jetty-schemas -->
+		<dependency>
+			<groupId>org.eclipse.jetty.toolchain</groupId>
+			<artifactId>jetty-schemas</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-security -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-security</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlets -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlets</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-unixsocket -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-unixsocket</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-util -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-webapp -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-xml -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-xml</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.orbit/javax.mail.glassfish -->
+		<dependency>
+			<groupId>org.eclipse.jetty.orbit</groupId>
+			<artifactId>javax.mail.glassfish</artifactId>
+			<version>1.4.1.v201005082020</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.toolchain.setuid/jetty-setuid-java -->
+		<dependency>
+			<groupId>org.eclipse.jetty.toolchain.setuid</groupId>
+			<artifactId>jetty-setuid-java</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-spring -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-spring</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.transaction/javax.transaction-api -->
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>javax.transaction-api</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/javax-websocket-client-impl -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>javax-websocket-client-impl</artifactId>
+			<version>9.4.0.RC1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/javax-websocket-server-impl -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>javax-websocket-server-impl</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.websocket/javax.websocket-api -->
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+			<version>1.1</version>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-api -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-api</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-client -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-client</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-common -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-common</artifactId>
+			<version>9.4.6.v20170531</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-server -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-server</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-servlet -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-servlet</artifactId>
+			<version>9.4.12.RC2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.8.0-beta0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.8.0-beta0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
+		<!-- DKPro KrippAlpha -->
+		<!-- https://mvnrepository.com/artifact/org.dkpro.statistics/dkpro-statistics -->
+		<dependency>
+			<groupId>org.dkpro.statistics</groupId>
+			<artifactId>dkpro-statistics</artifactId>
+			<version>2.1.0</version>
+			<type>pom</type>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.dkpro.statistics/dkpro-statistics-agreement -->
+		<dependency>
+			<groupId>org.dkpro.statistics</groupId>
+			<artifactId>dkpro-statistics-agreement</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>de.aitools.aq.wat.WatServletServer</mainClass>
+						</manifest>
+					</archive>
+					<appendAssemblyId>true</appendAssemblyId>
+					<finalName>WAT-SL-${project.version}</finalName>
+					<outputDirectory>${project.basedir}</outputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+
 </project>
