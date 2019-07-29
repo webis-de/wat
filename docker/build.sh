@@ -1,5 +1,5 @@
 #!/bin/bash
-cp ../demo-project.zip .
+cp ../example-project.zip .
 cp ../wat.jar .
 
 is_in_docker_group=$(groups | sed 's/ /\n/g' | grep '^docker$' | wc -l)

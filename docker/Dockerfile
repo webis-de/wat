@@ -6,12 +6,12 @@ EXPOSE $PORT
 
 RUN mkdir -p /srv/wat
 ADD wat.jar /srv/wat
-ADD demo-project.zip /srv/wat
+ADD example-project.zip /srv/wat
 
 WORKDIR /srv/wat
-RUN unzip demo-project.zip
-RUN rm demo-project.zip
-RUN mv demo-project project
+RUN unzip example-project.zip
+RUN rm example-project.zip
+RUN mv example-project project
 
 WORKDIR /srv/wat/project
 CMD java -jar ../wat.jar $PORT $BASEPATH
