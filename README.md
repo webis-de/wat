@@ -11,7 +11,9 @@ Usage
 -----
 Download the [wat.jar](https://github.com/webis-de/wat/releases/download/2.0.0/wat.jar). Then unpack the <code>example-project.zip</code> and cd into the example project folder. Then use
 
-    java -jar <path-to>/wat.jar [<port> [<base-path>]]
+```
+java -jar <path-to>/wat.jar [<port> [<base-path>]]
+```
 
 to start the server on the given port (default port is 2112) and base-path (default base-path is "/"). You can then access documentation on how to adjust and use the server at
 
@@ -21,21 +23,37 @@ to start the server on the given port (default port is 2112) and base-path (defa
 Building
 --------
 
-    mvn clean install assembly:single
-    mv wat-sl-*-jar-with-dependencies.jar wat.jar
+```
+mvn clean install assembly:single
+mv wat-sl-*-jar-with-dependencies.jar wat.jar
+```
 
 There is a Dockerfile that runs the demo project. After building the wat.jar, you can create the Dockerfile like this:
 
-    cd docker
-    ./build.sh
+```
+cd docker
+./build.sh
+```
 
 You can then start the demo-server like this:
 
-    docker run -p <port>:2112 -t wat
+```
+docker run -p <port>:2112 -t wat
+```
 
 Or just use the version in our [repository on docker hub](https://hub.docker.com/r/webis/wat/) like this:
 
-    docker run -d -p 2112:2112 --restart=unless-stopped -t webis/wat:2.0.0
+```
+docker run -d -p 2112:2112 --restart=unless-stopped -t webis/wat:2.0.0
+```
+
+
+Webis Kubernetes
+----------------
+We use the following command to deploy the demo on our cluster:
+```
+kubectl apply --cluster=betaweb --namespace=webisservices -f wat-kubernetes.yaml
+```
     
     
 Citation
