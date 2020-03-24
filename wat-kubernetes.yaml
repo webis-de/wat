@@ -21,17 +21,3 @@ spec:
             - containerPort: 2112
               protocol: TCP
               name: wat-port
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: wat-service
-spec:
-  type: NodePort
-  ports:
-    - port: 8080
-      targetPort: wat-port
-      nodePort: 30287
-  selector:
-    app: wat
-
