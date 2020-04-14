@@ -21,3 +21,4 @@ spec:
             - containerPort: 2112
               protocol: TCP
               name: wat-port
+      priorityClassName: webisservices
