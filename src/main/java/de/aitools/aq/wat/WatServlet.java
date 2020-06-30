@@ -63,12 +63,14 @@ public class WatServlet extends HttpServlet {
 	public static final String ADMIN_ACTION_RESULTS_DETAILD_ANN = "Write annotated segments (BRAT compatible ANN.files)";
 
 	public static final String ADMIN_ACTION_RESULTS_DETAILD_CSV = "Write annotated segments (CSV-files)";
-	
+
 	public static final String ADMIN_ACTION_SHOW_AGREEMENT = "Show agreement statistics";
 
 	public static final String ADMIN_ACTION_SHOW_PROGRESS = "Show annotation progress";
-	
+
 	public static final String ADMIN_ACTION_SHOW_DETAILED_PROGRESS = "Show detailed annotation progress";
+
+	public static final String ADMIN_ACTION_SHOW_ALL_VS_ONE_AGREEMENT = "Show all vs one agreement statistics";
 
 	private final WatProject project;
 
@@ -90,120 +92,99 @@ public class WatServlet extends HttpServlet {
 
 	private final Panel adminAnnotationDetailedProgressPanel;
 
-	
-	public WatServlet() throws IOException
-	{
+	public WatServlet() throws IOException {
 		this.project = new WatProject(new File("."));
 		final String projectName = this.project.getName();
 
-		this.annotatorLoginPage			= new AnnotatorLoginPage(projectName);
-		this.annotatorLoginFailedPage	= new AnnotatorLoginFailedPage(projectName);
-		this.annotatorTaskSelectionPage	= new AnnotatorTaskSelectionPage(projectName);
-		this.adminLoginPage				= new AdminLoginPage(projectName);
-		this.adminLoginFailedPage		= new AdminLoginFailedPage(projectName);
-		this.adminControlsPage			= new AdminControlsPage(projectName);
+		this.annotatorLoginPage = new AnnotatorLoginPage(projectName);
+		this.annotatorLoginFailedPage = new AnnotatorLoginFailedPage(projectName);
+		this.annotatorTaskSelectionPage = new AnnotatorTaskSelectionPage(projectName);
+		this.adminLoginPage = new AdminLoginPage(projectName);
+		this.adminLoginFailedPage = new AdminLoginFailedPage(projectName);
+		this.adminControlsPage = new AdminControlsPage(projectName);
 
-		this.adminAgreementStatisticsPanel			= new AdminAgreementStatisticsPanel(this.project);
-		this.adminAnnotationProgressPanel			= new AdminAnnotationProgressPanel(this.project);
-		this.adminAnnotationDetailedProgressPanel	= new AdminAnnotationDetailedProgressPanel(this.project);
+		this.adminAgreementStatisticsPanel = new AdminAgreementStatisticsPanel(this.project);
+		this.adminAnnotationProgressPanel = new AdminAnnotationProgressPanel(this.project);
+		this.adminAnnotationDetailedProgressPanel = new AdminAnnotationDetailedProgressPanel(this.project);
 	}
 
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
-			throws ServletException, IOException
-	{
+			throws ServletException, IOException {
 		this.serve(request, response);
 	}
 
 	@Override
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
-			throws ServletException, IOException
-	{
+			throws ServletException, IOException {
 		this.serve(request, response);
 	}
 
 	private void serve(final HttpServletRequest request, final HttpServletResponse response)
-			throws ServletException, IOException
-	{
-		try (final PrintWriter output = response.getWriter())
-		{
+			throws ServletException, IOException {
+		try (final PrintWriter output = response.getWriter()) {
 			final String action = this.getAction(request);
-			switch (action)
-			{
-				case "":
-					response.sendRedirect(request.getRequestURI() + "/" + ACTION_ANNOTATE);
-					break;
+			switch (action) {
+			case "":
+				response.sendRedirect(request.getRequestURI() + "/" + ACTION_ANNOTATE);
+				break;
 
-				case ACTION_ANNOTATE:
-					response.setContentType("text/html");
-					this.serveAnnotate(request, output);
-					break;
+			case ACTION_ANNOTATE:
+				response.setContentType("text/html");
+				this.serveAnnotate(request, output);
+				break;
 
-				case ACTION_UPDATE_STATE:
-					response.setContentType("application/json");
-					this.serveUpdateState(request, output);
-					break;
+			case ACTION_UPDATE_STATE:
+				response.setContentType("application/json");
+				this.serveUpdateState(request, output);
+				break;
 
-				case ACTION_ADMIN:
-					response.setContentType("text/html");
-					this.serveAdmin(request, output);
-					break;
+			case ACTION_ADMIN:
+				response.setContentType("text/html");
+				this.serveAdmin(request, output);
+				break;
 
-				default:
-					response.setContentType("text/html");
-					output.append("<html><head><title>Error</title></head><body>No such action: ")
-						.append(action)
+			default:
+				response.setContentType("text/html");
+				output.append("<html><head><title>Error</title></head><body>No such action: ").append(action)
 						.append("</body></html>");
 			}
 		}
 	}
 
-	private String getAction(final HttpServletRequest request)
-	{
+	private String getAction(final HttpServletRequest request) {
 		final String requestUri = request.getRequestURI();
 		final int pathStart = requestUri.lastIndexOf(WatServletServer.SERVLET_PATH);
 		assert pathStart >= 0;
 		// + 1 due to the "/" following the path
 		final int requestOffset = pathStart + WatServletServer.SERVLET_PATH.length() + 1;
-		
-		if (requestOffset >= requestUri.length())
-		{
+
+		if (requestOffset >= requestUri.length()) {
 			return "";
-		}
-		else
-		{
+		} else {
 			final String[] requestParts = requestUri.substring(requestOffset).split("/");
 			return requestParts[0];
 		}
 	}
 
-	private void serveAnnotate(final HttpServletRequest request, final PrintWriter output) throws IOException
-	{
+	private void serveAnnotate(final HttpServletRequest request, final PrintWriter output) throws IOException {
 		final String annotatorName = request.getParameter(REQUEST_PARAMETER_ANNOTATOR);
 		final String password = request.getParameter(REQUEST_PARAMETER_PASSWORD);
 		final String isAdminLoginString = request.getParameter(REQUEST_PARAMETER_ADMIN_LOGIN);
 		final boolean isAdminLogin = isAdminLoginString == null ? false : Boolean.parseBoolean(isAdminLoginString);
 		final Annotator annotator = this.project.getAnnotator(annotatorName);
 
-		if (annotatorName == null || annotatorName.isEmpty())
-		{
+		if (annotatorName == null || annotatorName.isEmpty()) {
 			this.annotatorLoginPage.print(output, null, null, isAdminLogin);
-		}
-		else if (annotator == null || !annotator.checkPassword(password))
-		{
+		} else if (annotator == null || !annotator.checkPassword(password)) {
 			this.annotatorLoginFailedPage.print(output, null, null, isAdminLogin);
-		}
-		else
-		{
+		} else {
 			final String taskName = request.getParameter(REQUEST_PARAMETER_TASK);
 			final Task task = annotator.getTask(taskName);
-			
-			if (task == null)
-			{
+
+			if (task == null) {
 				this.annotatorTaskSelectionPage.print(output, annotator, null, isAdminLogin);
-			}
-			else
-			{
+			} else {
 				final int timeZoneOffset = Integer.parseInt(request.getParameter(REQUEST_PARAMETER_TIME_ZONE_OFFSET));
 				final Client client = this.getClient(request);
 				final TaskState state = annotator.getState(task);
@@ -214,31 +195,26 @@ public class WatServlet extends HttpServlet {
 	}
 
 	private void serveUpdateState(final HttpServletRequest request, final PrintWriter output)
-			throws IllegalArgumentException, IOException
-	{
+			throws IllegalArgumentException, IOException {
 		final String annotatorName = request.getParameter(REQUEST_PARAMETER_ANNOTATOR);
 		final String password = request.getParameter(REQUEST_PARAMETER_PASSWORD);
 		final Annotator annotator = this.project.getAnnotator(annotatorName);
 
-		if (annotator != null && annotator.checkPassword(password))
-		{
+		if (annotator != null && annotator.checkPassword(password)) {
 			final String taskName = request.getParameter(REQUEST_PARAMETER_TASK);
 			final Task task = annotator.getTask(taskName);
 
-			if (task != null)
-			{
+			if (task != null) {
 				final Client client = this.getClient(request);
 				final int timeZoneOffset = Integer.parseInt(request.getParameter(REQUEST_PARAMETER_TIME_ZONE_OFFSET));
 				final TaskState state = annotator.getState(task);
 
-				if (state != null)
-				{
+				if (state != null) {
 					final String componentName = request.getParameter(REQUEST_PARAMETER_COMPONENT);
 					final String key = request.getParameter(REQUEST_PARAMETER_KEY);
 					final String value = request.getParameter(REQUEST_PARAMETER_VALUE);
 
-					if (componentName != null && key != null && value != null)
-					{
+					if (componentName != null && key != null && value != null) {
 						state.setValue(componentName, key, value, client, timeZoneOffset);
 						final boolean isComplete = state.isComplete();
 						output.append("{\"success\":true,\"complete\":" + isComplete + "}");
@@ -249,66 +225,58 @@ public class WatServlet extends HttpServlet {
 		}
 	}
 
-	private void serveAdmin(final HttpServletRequest request, final PrintWriter output) throws IOException
-	{
+	private void serveAdmin(final HttpServletRequest request, final PrintWriter output) throws IOException {
 		final String password = request.getParameter(REQUEST_PARAMETER_PASSWORD);
-		
-		if (password == null || password.isEmpty())
-		{
+
+		if (password == null || password.isEmpty()) {
 			this.adminLoginPage.print(output, null);
 		}
-		
-		else if (!this.project.getAdminPassword().equals(password))
-		{
+
+		else if (!this.project.getAdminPassword().equals(password)) {
 			this.adminLoginFailedPage.print(output, null);
-		}
-		else
-		{
+		} else {
 			final String adminAction = request.getParameter(REQUEST_PARAMETER_ADMIN_ACTION);
 			boolean adminActionSuccess = true;
 			final List<Panel> panels = new ArrayList<>();
 
-			if (adminAction != null)
-			{
-				switch (adminAction)
-				{
-					case ADMIN_ACTION_RELOAD:
+			if (adminAction != null) {
+				switch (adminAction) {
+				case ADMIN_ACTION_RELOAD:
 
-						this.project.reload();
-						if (!this.project.getAdminPassword().equals(password))
-						{
-							this.adminLoginFailedPage.print(output, null);
-							return;
-						}
-						break;
+					this.project.reload();
+					if (!this.project.getAdminPassword().equals(password)) {
+						this.adminLoginFailedPage.print(output, null);
+						return;
+					}
+					break;
 
-					case ADMIN_ACTION_RESULTS:
-						this.project.writeResults();
-						break;
+				case ADMIN_ACTION_RESULTS:
+					this.project.writeResults();
+					break;
 
-					case ADMIN_ACTION_RESULTS_DETAILD_CSV:
-						this.project.writeDetailedResultsCsv();
-						break;
+				case ADMIN_ACTION_RESULTS_DETAILD_CSV:
+					this.project.writeDetailedResultsCsv();
+					break;
 
-					case ADMIN_ACTION_RESULTS_DETAILD_ANN:
-						this.project.writeDetailedResultsAnn();
-						break;
+				case ADMIN_ACTION_RESULTS_DETAILD_ANN:
+					this.project.writeDetailedResultsAnn();
+					break;
 
-					case ADMIN_ACTION_SHOW_AGREEMENT:
-						panels.add(this.adminAgreementStatisticsPanel);
-						break;
+				case ADMIN_ACTION_SHOW_AGREEMENT:
+					panels.add(this.adminAgreementStatisticsPanel);
+					break;
 
-					case ADMIN_ACTION_SHOW_PROGRESS:
-						panels.add(this.adminAnnotationProgressPanel);
-						break;
+				case ADMIN_ACTION_SHOW_PROGRESS:
+					panels.add(this.adminAnnotationProgressPanel);
+					break;
 
-					case ADMIN_ACTION_SHOW_DETAILED_PROGRESS:
-						panels.add(this.adminAnnotationDetailedProgressPanel);
-						break;
+				case ADMIN_ACTION_SHOW_DETAILED_PROGRESS:
+					panels.add(this.adminAnnotationDetailedProgressPanel);
+					break;
 
-					default:
-						adminActionSuccess = false;
-						break;
+				default:
+					adminActionSuccess = false;
+					break;
 				}
 			}
 
@@ -316,17 +284,13 @@ public class WatServlet extends HttpServlet {
 		}
 	}
 
-	private Client getClient(final HttpServletRequest request)
-	{
+	private Client getClient(final HttpServletRequest request) {
 		final String isAdminLoginString = request.getParameter(REQUEST_PARAMETER_ADMIN_LOGIN);
 
-		if (isAdminLoginString != null && Boolean.parseBoolean(isAdminLoginString))
-		{
+		if (isAdminLoginString != null && Boolean.parseBoolean(isAdminLoginString)) {
 			return Client.ADMIN;
-		}
-		else
-		{
-		  return Client.ANNOTATOR;
+		} else {
+			return Client.ANNOTATOR;
 		}
 	}
 }

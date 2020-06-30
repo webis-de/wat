@@ -54,6 +54,11 @@ public class AdminControlsPage extends AdminPage {
 				WatServlet.ADMIN_ACTION_SHOW_AGREEMENT, null
 				);
 
+		this.makeButton(
+				output,
+				WatServlet.ADMIN_ACTION_SHOW_ALL_VS_ONE_AGREEMENT, null
+				);
+
 		output.append("</div>\n");
 		output.append("<br/>\n\n");
 	}
