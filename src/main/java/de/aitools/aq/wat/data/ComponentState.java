@@ -25,9 +25,9 @@ public abstract class ComponentState implements Iterable<Entry<String, String>> 
 
 	private final Map<String, String> valueMap;
 
-	static final String[] HEADER = { "text", "label"};
+	static final String[] HEADER = { "text", "label" };
 	private static final String NEW_LINE_SEPARATOR = "\n";
-	
+
 	public ComponentState() {
 		this.valueMap = new LinkedHashMap<String, String>();
 	}
@@ -59,46 +59,36 @@ public abstract class ComponentState implements Iterable<Entry<String, String>> 
 
 	protected abstract void updateProgress(final String key, final String value);
 
-	public void writeKeyValues(final Writer writer, final String componentName) throws IOException
-	{
-		if (componentName.equals("segment-labeling"))
-		{
+	public void writeKeyValues(final Writer writer, final String componentName) throws IOException {
+		if (componentName.equals("segment-labeling")) {
 			final Set<String> keys = new TreeSet<>(this.valueMap.keySet());
 
 			TreeMap<Integer, String> segmentedLabels = new TreeMap<Integer, String>();
 
-			for (final String key : keys)
-			{
+			for (final String key : keys) {
 				int k = Integer.parseInt(key);
 				segmentedLabels.put(k, componentName + "." + key + " = " + this.valueMap.get(key));
 			}
 
-			for (Entry<Integer, String> entry : segmentedLabels.entrySet() )
-			{
+			for (Entry<Integer, String> entry : segmentedLabels.entrySet()) {
 				writer.append(entry.getValue()).append('\n');
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public void writeKeySegmentDetailedValuesAnn(
-			final Writer writer,
-			final String componentName,
-			final Task task,
-			final String tasksDirectoryName,
-			final String annotatorName,
-			final String annotatedSegmentsDirectoryName
-		) throws IOException
-	{
-		if (componentName.equals("segment-labeling"))
-		{
+	public void writeKeySegmentDetailedValuesAnn(final Writer writer, final String componentName, final Task task,
+			final String tasksDirectoryName, final String annotatorName, final String annotatedSegmentsDirectoryName)
+			throws IOException {
+		if (componentName.equals("segment-labeling")) {
 			final Set<String> keys = new TreeSet<>(this.valueMap.keySet());
 
 			TreeMap<Integer, String> segmentedLabels = new TreeMap<Integer, String>();
+			TreeMap<Integer, Integer> offsetStartLabel = new TreeMap<Integer, Integer>();
+			TreeMap<Integer, Integer> offsetEndLabel = new TreeMap<Integer, Integer>();
 
 			// sort keys
-			for (final String key : keys)
-			{
+			for (final String key : keys) {
 				int k = Integer.parseInt(key);
 				segmentedLabels.put(k, this.valueMap.get(key));
 			}
@@ -108,61 +98,55 @@ public abstract class ComponentState implements Iterable<Entry<String, String>> 
 
 			// segments
 			@SuppressWarnings("resource")
-			Stream<String> lines = Files.lines(Paths.get(tasksDirectoryName + "/" + task.getName() + "/segment-labeling.txt"));
-			
-			for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();)
-			{
+			Stream<String> lines = Files
+					.lines(Paths.get(tasksDirectoryName + "/" + task.getName() + "/segment-labeling.txt"));
+
+			int offsetStart = 0;
+			int offsetEnd = 0;
+
+			for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();) {
 				String line = iterator.next().toString();
-				
-				if (!(line.equals("")))
-				{
+				offsetEnd = offsetStart + line.length();
+				offsetStart = offsetEnd + 1;
+
+				if (!(line.equals(""))) {
 					textSegments.put(i, line);
+					offsetStartLabel.put(i, offsetStart);
+					offsetEndLabel.put(i, offsetEnd);
 					i++;
 				}
 			}
-			
+
 			ArrayList<TextLabel> mapTextLabel = new ArrayList<TextLabel>();
-			
+
 			int index = 0;
-			
-			int offsetStart = 0;
-			int offsetEnd = 0;
-			
+
 			// write content of BRAT-File.
-			for (Entry<Integer, String> entry : segmentedLabels.entrySet() )
-			{
-				offsetEnd = offsetStart + entry.getValue().length() - 1;
-				writer.append("T" + index + "\t" + entry.getValue() + " " + offsetStart + " " + offsetEnd + "\t" + textSegments.get(entry.getKey()) ).append('\n');
-				
+			for (Entry<Integer, String> entry : segmentedLabels.entrySet()) {
+				String text = textSegments.get(entry.getKey());
+				offsetStart = offsetStartLabel.get(entry.getKey());
+				offsetEnd = offsetEndLabel.get(entry.getKey());
+
+				writer.append("T" + index + "\t" + entry.getValue() + " " + offsetStart + " " + offsetEnd + "\t" + text)
+						.append('\n');
 				index++;
-				
 				TextLabel tl = new TextLabel(entry.getValue(), textSegments.get(entry.getKey()));
-				
 				mapTextLabel.add(tl);
-				
-				offsetStart = offsetStart + entry.getValue().length() + 1;
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public void writeKeySegmentDetailedValuesCsv(
-			final String componentName,
-			final Task task,
-			final String tasksDirectoryName,
-			final String annotatorName,
-			final String annotatedSegmentsDirectoryName
-		) throws IOException
-	{
-		if (componentName.equals("segment-labeling"))
-		{
+	public void writeKeySegmentDetailedValuesCsv(final String componentName, final Task task,
+			final String tasksDirectoryName, final String annotatorName, final String annotatedSegmentsDirectoryName)
+			throws IOException {
+		if (componentName.equals("segment-labeling")) {
 			final Set<String> keys = new TreeSet<>(this.valueMap.keySet());
 
 			TreeMap<Integer, String> segmentedLabels = new TreeMap<Integer, String>();
 
 			// sort keys
-			for (final String key : keys)
-			{
+			for (final String key : keys) {
 				int k = Integer.parseInt(key);
 				segmentedLabels.put(k, this.valueMap.get(key));
 			}
@@ -172,76 +156,62 @@ public abstract class ComponentState implements Iterable<Entry<String, String>> 
 
 			// segments
 			@SuppressWarnings("resource")
-			Stream<String> lines = Files.lines(Paths.get(tasksDirectoryName + "/" + task.getName() + "/segment-labeling.txt"));
-			
-			for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();)
-			{
+			Stream<String> lines = Files
+					.lines(Paths.get(tasksDirectoryName + "/" + task.getName() + "/segment-labeling.txt"));
+
+			for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();) {
 				String line = iterator.next().toString();
-				
-				if (!(line.equals("")))
-				{
+
+				if (!(line.equals(""))) {
 					textSegments.put(i, line);
 					i++;
 				}
 			}
 
 			ArrayList<TextLabel> mapTextLabel = new ArrayList<TextLabel>();
-			
+
 			// write content of BRAT-File.
-			for (Entry<Integer, String> entry : segmentedLabels.entrySet() )
-			{
+			for (Entry<Integer, String> entry : segmentedLabels.entrySet()) {
 				TextLabel tl = new TextLabel(entry.getValue(), textSegments.get(entry.getKey()));
-				
+
 				mapTextLabel.add(tl);
 			}
 
 			FileWriter fileWriter = null;
 			CSVPrinter csvFilePrinter = null;
-			//Create the CSVFormat object with "\n" as a record delimiter
+			// Create the CSVFormat object with "\n" as a record delimiter
 
-			CSVFormat csvFileFormat = CSVFormat
-					.DEFAULT
-					.withRecordSeparator(NEW_LINE_SEPARATOR)
-					.withDelimiter('\t')
-					.withQuote('"')
-					;
+			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR).withDelimiter('\t')
+					.withQuote('"');
 
-			try
-			{
-				//initialize FileWriter object
-				fileWriter = new FileWriter(annotatedSegmentsDirectoryName + "/" + task.getName() + "/" + annotatorName + ".csv");
+			try {
+				// initialize FileWriter object
+				fileWriter = new FileWriter(
+						annotatedSegmentsDirectoryName + "/" + task.getName() + "/" + annotatorName + ".csv");
 
-				//initialize CSVPrinter object
+				// initialize CSVPrinter object
 				csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
-				
-				//Create CSV file header
+
+				// Create CSV file header
 				csvFilePrinter.printRecord(HEADER);
-				
-				for (int k = 0; k < mapTextLabel.size(); k++)
-				{
+
+				for (int k = 0; k < mapTextLabel.size(); k++) {
 					List r = new ArrayList<>();
 					r.add(mapTextLabel.get(k).getText());
 					r.add(mapTextLabel.get(k).getLabel());
 					csvFilePrinter.printRecord(r);
 				}
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				System.out.println("Error in CsvFileWriter !!!");
 				e.printStackTrace();
-		
-			}
-			finally
-			{
-		
-				try
-				{
+
+			} finally {
+
+				try {
 					fileWriter.flush();
 					fileWriter.close();
 					csvFilePrinter.close();
-				}
-				catch (IOException e)
-				{
+				} catch (IOException e) {
 					System.out.println("Error while flushing/closing fileWriter/csvPrinter !!!");
 					e.printStackTrace();
 				}
