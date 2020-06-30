@@ -107,7 +107,6 @@ public abstract class ComponentState implements Iterable<Entry<String, String>> 
 			for (Iterator<String> iterator = lines.iterator(); iterator.hasNext();) {
 				String line = iterator.next().toString();
 				offsetEnd = offsetStart + line.length();
-				offsetStart = offsetEnd + 1;
 
 				if (!(line.equals(""))) {
 					textSegments.put(i, line);
@@ -115,6 +114,7 @@ public abstract class ComponentState implements Iterable<Entry<String, String>> 
 					offsetEndLabel.put(i, offsetEnd);
 					i++;
 				}
+				offsetStart = offsetEnd + 1;
 			}
 
 			ArrayList<TextLabel> mapTextLabel = new ArrayList<TextLabel>();
