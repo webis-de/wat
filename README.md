@@ -60,6 +60,6 @@ Citation
 --------
 If you use WAT-SL in your scientific work, please refer to it using [this publication](https://webis.de/publications.html#filter:WAT-SL%20A%20Customizable%20Web%20Annotation%20Tool%20for%20Segment%20Labeling):
 
-Johannes Kiesel, Henning Wachsmuth, Khalid Al-Khatib, and Benno Stein. WAT-SL: A Customizable Web Annotation Tool for Segment Labeling. In Software Demonstrations at the 15th Conference of the European Chapter of the Association for Computational Linguistics (EACL 2017).
+Johannes Kiesel, Henning Wachsmuth, Khalid Al-Khatib, and Benno Stein. WAT-SL: [A Customizable Web Annotation Tool for Segment Labeling](https://www.aclweb.org/anthology/E17-3004). In Software Demonstrations at the 15th Conference of the European Chapter of the Association for Computational Linguistics (EACL 2017).
 
-Christina Lohr, Johannes Kiesel, Stephanie Luther, Johannes Hellrich, Benno Stein, Udo Hahn: Continuous Quality Control and Advanced Text Segment Annotation with WAT-SL 2.0 In 13th Linguistic Annotation Workshop at the 57th Annual Meeting of the Association for Computational Linguistics (ACL 2019).
+Christina Lohr, Johannes Kiesel, Stephanie Luther, Johannes Hellrich, Benno Stein, Udo Hahn: [Continuous Quality Control and Advanced Text Segment Annotation with WAT-SL 2.0](https://www.aclweb.org/anthology/W19-4025). In 13th Linguistic Annotation Workshop at the 57th Annual Meeting of the Association for Computational Linguistics (ACL 2019).
