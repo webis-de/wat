@@ -47,14 +47,6 @@ Or just use the version in our [repository on docker hub](https://hub.docker.com
 docker run -d -p 2112:2112 --restart=unless-stopped -t webis/wat:2.0.0
 ```
 
-
-Webis Kubernetes
-----------------
-We use the following command to deploy the demo on our cluster:
-```
-kubectl apply --cluster=betaweb --namespace=webisservices -f wat-kubernetes.yaml
-```
-    
     
 Citation
 --------
