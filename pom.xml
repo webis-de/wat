@@ -141,7 +141,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
 			<artifactId>http2-server</artifactId>
-			<version>9.4.12.RC2</version>
+			<version>9.4.48.v20220622</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.orbit/javax.security.auth.message -->
