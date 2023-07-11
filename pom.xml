@@ -368,7 +368,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-xml</artifactId>
-			<version>9.4.12.RC2</version>
+			<version>12.0.0.alpha0</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.orbit/javax.mail.glassfish -->
