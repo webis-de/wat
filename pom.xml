@@ -134,7 +134,7 @@
 		<dependency>
 			<groupId>org.eclipse.jetty.http2</groupId>
 			<artifactId>http2-hpack</artifactId>
-			<version>9.4.12.RC2</version>
+			<version>9.4.53.v20231009</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.http2/http2-server -->
